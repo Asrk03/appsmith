@@ -19,11 +19,21 @@ public class OAuth2Utils {
             if (expiresAtResponse != null) {
                 expiresAt = Instant.ofEpochSecond(Long.parseLong(String.valueOf(expiresAtResponse)));
             } else if (expiresInResponse != null) {
-                expiresAt = issuedAt.plusSeconds(Long.parseLong(String.valueOf(expiresInResponse)));
+                Long expiresInValue = Long.parseLong(String.valueOf(expiresInResponse));
+                if(expiresInValue >= 3600){
+                    expiresAt = issuedAt.plusSeconds(expiresInValue);
+                } else {
+                    throw new IllegalArgumentException("expiresIn must be atleast 1 hour (3600 seconds)");
+                }
             }
         } else {
             // we have expires_in field from datasource config, we will always use that
-            expiresAt = issuedAt.plusSeconds(Long.parseLong(expiresIn));
+            Long expiresInValue = Long.parseLong(expiresIn);
+            if(expiresInValue >= 3600){
+                expiresAt = issuedAt.plusSeconds(expiresInValue);
+            } else{
+                throw new IllegalArgumentException("expiresIn must be atleast 1 hour (3600 seconds)");
+            }
         }
         return expiresAt;
     }
